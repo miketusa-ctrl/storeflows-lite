@@ -76,6 +76,38 @@ def scan(original: Path, recalced: Path, csv_mode: bool = False) -> tuple[int, i
     return formulas, checked, problems
 
 
+def check_incremental(recalced: Path, label: str, default_min: int = 100) -> list[str]:
+    """Rows whose holdout is below the minimum must show n/a for incremental orders/revenue (cols Q, R, S)."""
+    problems = []
+    wb = load_workbook(recalced, data_only=True)
+    min_h = default_min
+    if "Settings" in wb.sheetnames and isinstance(wb["Settings"]["B5"].value, (int, float)):
+        min_h = wb["Settings"]["B5"].value
+    for ws in wb.worksheets:
+        hdr = None
+        for row in ws.iter_rows(min_row=1, max_row=10):
+            vals = [c.value for c in row]
+            if "Holdout recipients" in vals and "Incremental revenue" in vals:
+                hdr = row[0].row
+                cols = {v: i + 1 for i, v in enumerate(vals) if v}
+                break
+        if not hdr:
+            continue
+        for r in range(hdr + 1, ws.max_row + 1):
+            name = ws.cell(r, 1).value
+            if not name:
+                continue
+            h = ws.cell(r, cols["Holdout recipients"]).value
+            small = not isinstance(h, (int, float)) or h < min_h
+            for col in ("Incremental orders", "Incremental revenue", "Incremental revenue net of discount"):
+                v = ws.cell(r, cols[col]).value
+                if small and isinstance(v, (int, float)):
+                    problems.append(f"{label}!{ws.title} row {r} ({name}): holdout {h} < {min_h} but {col} = {v}")
+                if not small and not isinstance(v, (int, float)):
+                    problems.append(f"{label}!{ws.title} row {r} ({name}): holdout {h} >= {min_h} but {col} = {v!r}")
+    return problems
+
+
 def dump(recalced: Path, sheet: str, first: int, last: int, cols: str) -> None:
     ws = load_workbook(recalced, data_only=True)[sheet]
     for r in range(first, last + 1):
@@ -103,6 +135,7 @@ def main() -> int:
         for x in xlsx_targets:
             rc = recalc(x, tmp)
             f, n, p = scan(x, rc)
+            p += check_incremental(rc, x.name)
             if "tracker" in x.name and "--dump" in sys.argv:
                 print("   Flow log A,L,M,N,O,P,R,S,U,W (rows 5-11):")
                 dump(rc, "Flow log", 5, 11, "ALMNOPRSUW")
@@ -128,7 +161,25 @@ def main() -> int:
             (tmp / "stress").mkdir(exist_ok=True)
             blank = tmp / "stress" / "blank-inputs-tracker.xlsx"
             wb.save(blank)
-            f, n, p = scan(blank, recalc(blank, tmp))
+            rb = recalc(blank, tmp)
+            f, n, p = scan(blank, rb)
+            p += check_incremental(rb, "blank-inputs-tracker.xlsx")
+            # second stress case: every holdout set to 0 (no control group at all)
+            wb0 = load_workbook(src)
+            ws0 = wb0["Flow log"]
+            zeroed = 0
+            for r in range(5, ws0.max_row + 1):
+                if ws0.cell(r, 1).value and not str(ws0.cell(r, 8).value or "").startswith("="):
+                    ws0.cell(r, 8).value = 0
+                    zeroed += 1
+            zero = tmp / "stress" / "zero-holdout-tracker.xlsx"
+            wb0.save(zero)
+            rz = recalc(zero, tmp)
+            f0, n0, p0 = scan(zero, rz)
+            p0 += check_incremental(rz, "zero-holdout-tracker.xlsx")
+            print(f"[xlsx] zero-holdout stress test ({zeroed} holdouts set to 0): {f0} formulas recalculated, {len(p0)} problems")
+            total_f += f0
+            all_problems += p0
             print(f"[xlsx] blank-input stress test ({cleared} inputs cleared): {f} formulas recalculated, {len(p)} problems")
             total_f += f
             all_problems += p
@@ -136,7 +187,9 @@ def main() -> int:
             text = x.read_text(encoding="utf-8")
             if ",=" not in text and not text.startswith("="):
                 continue
-            f, n, p = scan(x, recalc(x, tmp, csv_in=True), csv_mode=True)
+            rcsv = recalc(x, tmp, csv_in=True)
+            f, n, p = scan(x, rcsv, csv_mode=True)
+            p += check_incremental(rcsv, x.name)
             print(f"[csv ] {x.relative_to(ROOT)}: {f} formulas recalculated, {len(p)} problems")
             total_f += f
             all_problems += p

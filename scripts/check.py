@@ -35,6 +35,8 @@ PROMISE_RE = re.compile(
     r"(\b\d+x (your )?(revenue|sales)\b|skyrocket|explode your|100% inbox|always (land|lands) in (the )?inbox|"
     r"risk[- ]free revenue|passive income|make \$\d|double your (revenue|sales))", re.I)
 SPAMMY_RE = re.compile(r"(act now!|!!+|\bFREE\b!|click here now|limited time only!)")
+# Subject/preheader wording that promises something the no-offer version may not deliver
+PROMISE_SUBJECT_RE = re.compile(r"\b(gift|treat|free|% off|discount|coupon|sells? out|selling out|in stock|last chance)\b", re.I)
 REQUIRED_NOTICE = "Not affiliated with Klaviyo, MailerLite, Brevo, or Shopify."
 SKIP_DIRS = {".git", "dist", "__pycache__", ".scratch"}
 
@@ -207,6 +209,9 @@ def check(root: Path) -> list[str]:
                 for key in ("Subject A", "Subject B", "Subject C", "Preheader", "Send"):
                     if f"- **{key}:**" not in body:
                         errs.append(f"{rel(copy)}: Email {num} missing {key}")
+                for m in re.finditer(r"^- \*\*(Subject [ABC]|Preheader):\*\* (.*)$", body, re.M):
+                    if PROMISE_SUBJECT_RE.search(m.group(2)) and not re.search(r"only if true|use only with a real offer", body, re.I):
+                        errs.append(f"{rel(copy)}: Email {num} {m.group(1)} promises an offer/scarcity without an 'only if true' note: {m.group(2)}")
                 for ext in ("html", "txt"):
                     if not (flow / f"email-{num}.{ext}").exists():
                         errs.append(f"{rel(flow)}: missing email-{num}.{ext}")

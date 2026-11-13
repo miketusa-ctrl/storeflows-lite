@@ -25,7 +25,7 @@ CSV notes:
 
 ## Checking the math
 
-`scripts/verify_formulas.py` recalculates every workbook and formula CSV in LibreOffice and fails on any `#DIV/0!`, `#REF!`, `#VALUE!`, `#NAME?` or `#N/A`. It also runs a blank-input stress test. Divisions are guarded with `IF(denominator>0, …, 0)` and RPR lift shows `n/a` when holdout revenue is zero.
+`scripts/verify_formulas.py` recalculates every workbook and formula CSV in LibreOffice and fails on any `#DIV/0!`, `#REF!`, `#VALUE!`, `#NAME?` or `#N/A`. It also runs a blank-input stress test and a zero-holdout stress test, and fails if any row with a holdout below the minimum shows a number for incremental orders or revenue. Divisions are guarded with `IF(denominator>0, …, 0)` and RPR lift shows `n/a` when holdout revenue is zero.
 
 ## What the numbers mean
 
@@ -34,8 +34,8 @@ CSV notes:
 | Conv rate | orders ÷ recipients (treatment and holdout separately) |
 | RPR | revenue ÷ recipients |
 | RPR lift % | (RPR treatment − RPR holdout) ÷ RPR holdout |
-| Incremental revenue | (RPR treatment − RPR holdout) × treatment recipients |
-| Net of discount | incremental revenue − discount cost |
+| Incremental revenue | (RPR treatment − RPR holdout) × treatment recipients; shows `n/a (holdout too small)` until holdout recipients reach the Settings minimum (default 100) |
+| Net of discount | incremental revenue − discount cost (same `n/a` rule) |
 | z score | two-proportion z-test on conversion rate |
 | Confidence note | holdout and order minimums first, then z ≥ 2.576 / 1.96 / 1.645 |
 
