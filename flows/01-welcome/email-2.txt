@@ -1,0 +1,23 @@
+Hi {{first_name}},
+
+If you asked our regulars what to try first, most of them would point to {{signature_product_name}}.
+
+{{signature_product_story}}
+
+A few things people tell us they love about it:
+
+- {{signature_benefit_1}}
+- {{signature_benefit_2}}
+- {{signature_benefit_3}}
+
+Take a closer look: {{signature_product_url}}
+
+Not quite your style? That's fine too. The full collection is right here: browse everything ({{store_url}}).
+
+{{sender_name}}
+
+--
+You're receiving this because you signed up for emails from {{store_name}} or shopped with us.
+{{store_name}}, {{store_address}}
+Unsubscribe: {{unsubscribe_url}}
+Update preferences: {{preferences_url}}

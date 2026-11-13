@@ -1,0 +1,20 @@
+Hi {{first_name}},
+
+Thanks for joining {{store_name}}. {{brand_story}}
+
+Here's what you can expect from us: a first look at new arrivals, the occasional behind-the-scenes note, and honest recommendations. We email about {{email_frequency}}, and you can change that any time.
+
+{{welcome_offer_line}}
+
+Start browsing: {{bestsellers_url}}
+
+If you ever have a question, just hit reply. A real person reads every message.
+
+Warmly,
+{{sender_name}}, {{store_name}}
+
+--
+You're receiving this because you signed up for emails from {{store_name}} or shopped with us.
+{{store_name}}, {{store_address}}
+Unsubscribe: {{unsubscribe_url}}
+Update preferences: {{preferences_url}}

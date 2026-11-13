@@ -1,0 +1,20 @@
+Hi {{first_name}},
+
+Before you order anything, here are the details we'd want to know if we were in your shoes:
+
+- Shipping: {{shipping_policy_line}}
+- Returns: {{returns_policy_line}} Full details are on our returns page ({{returns_policy_url}}).
+- Help: Questions go to {{support_email}}, and we usually reply within {{reply_time}}.
+
+One quick question: what brought you to {{store_name}}? Reply with a word or two. It helps us send you more of what you actually want and less of what you don't.
+
+Shop the collection: {{store_url}}
+
+Thanks for being here,
+{{sender_name}}, {{store_name}}
+
+--
+You're receiving this because you signed up for emails from {{store_name}} or shopped with us.
+{{store_name}}, {{store_address}}
+Unsubscribe: {{unsubscribe_url}}
+Update preferences: {{preferences_url}}
