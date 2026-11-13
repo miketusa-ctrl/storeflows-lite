@@ -32,7 +32,8 @@ Results vary. These are templates and a planning sheet; nothing here promises op
 
 The Pro kit adds Browse Abandon, Cart/Checkout Abandon, Post-Purchase + Review Request, VIP/Loyalty and Win-Back, with setup specs for the ESP you choose (Klaviyo, MailerLite or Brevo editions), segment and discount-guardrail sheets, an agent pack (prompts + skills for MCP-capable assistants) and a worked example store. An Agency edition adds all three ESP spec sets, five niche copy variants and a client-work license.
 
-Get it on Payhip: PAYHIP_LINK_TBD
+- **Pro** (pick the Klaviyo, MailerLite or Brevo edition, $29): [https://payhip.com/b/21Nxq](https://payhip.com/b/21Nxq)
+- **Agency** (all three ESPs, five niche copy sets, client-work license, $79): [https://payhip.com/b/y3wea](https://payhip.com/b/y3wea)
 
 ## Support
 
