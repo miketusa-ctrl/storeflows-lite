@@ -36,7 +36,7 @@ PROMISE_RE = re.compile(
     r"risk[- ]free revenue|passive income|make \$\d|double your (revenue|sales))", re.I)
 SPAMMY_RE = re.compile(r"(act now!|!!+|\bFREE\b!|click here now|limited time only!)")
 # Subject/preheader wording that promises something the no-offer version may not deliver
-PROMISE_SUBJECT_RE = re.compile(r"\b(gift|treat|free|% off|discount|coupon|sells? out|selling out|in stock|last chance)\b", re.I)
+PROMISE_SUBJECT_RE = re.compile(r"(\b(gift|treat|free|discount|coupon|sells? out|selling out|in stock|last chance|before (sizes|stock) (go|run out)|only \d+ left|hurry)\b|\d+\s?% off)", re.I)
 REQUIRED_NOTICE = "Not affiliated with Klaviyo, MailerLite, Brevo, or Shopify."
 SKIP_DIRS = {".git", "dist", "__pycache__", ".scratch"}
 
@@ -209,9 +209,17 @@ def check(root: Path) -> list[str]:
                 for key in ("Subject A", "Subject B", "Subject C", "Preheader", "Send"):
                     if f"- **{key}:**" not in body:
                         errs.append(f"{rel(copy)}: Email {num} missing {key}")
-                for m in re.finditer(r"^- \*\*(Subject [ABC]|Preheader):\*\* (.*)$", body, re.M):
-                    if PROMISE_SUBJECT_RE.search(m.group(2)) and not re.search(r"only if true|use only with a real offer", body, re.I):
-                        errs.append(f"{rel(copy)}: Email {num} {m.group(1)} promises an offer/scarcity without an 'only if true' note: {m.group(2)}")
+                # Subjects A-C and the preheader are always checked. The optional offer subject lives inside a
+                # '>' editor note, so it is never matched here. A genuinely conditional subject may stay only if
+                # the very next line is an editor note saying "only if true".
+                blines = body.split("\n")
+                for k, bl in enumerate(blines):
+                    m = re.match(r"^- \*\*(Subject [ABC]|Preheader):\*\* (.*)$", bl)
+                    if not m or not PROMISE_SUBJECT_RE.search(m.group(2)):
+                        continue
+                    nxt = blines[k + 1] if k + 1 < len(blines) else ""
+                    if not (nxt.startswith(">") and re.search(r"only if true", nxt, re.I)):
+                        errs.append(f"{rel(copy)}: Email {num} {m.group(1)} promises an offer/scarcity without an 'only if true' note on the next line: {m.group(2)}")
                 for ext in ("html", "txt"):
                     if not (flow / f"email-{num}.{ext}").exists():
                         errs.append(f"{rel(flow)}: missing email-{num}.{ext}")
