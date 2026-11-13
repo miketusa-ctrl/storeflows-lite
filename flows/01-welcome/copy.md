@@ -17,7 +17,7 @@ Three emails that introduce the store, show what it's known for, and (only if yo
 
 Hi {{first_name}},
 
-Thanks for joining {{store_name}}. {{brand_story}}
+Thanks for joining {{store_name}}, and welcome. {{brand_story}}
 
 Here's what you can expect from us: a first look at new arrivals, the occasional behind-the-scenes note, and honest recommendations. We email about {{email_frequency}}, and you can change that any time.
 

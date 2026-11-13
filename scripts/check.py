@@ -136,6 +136,9 @@ def check(root: Path) -> list[str]:
                 left = sorted(set(PLACEHOLDER_RE.findall(text)))
                 if left:
                     errs.append(f"{rel(p)}: unfilled placeholders in worked example: {left}")
+                for n, line in enumerate(text.splitlines(), 1):
+                    if re.search(r"\w\.\.(?!\.)", line):
+                        errs.append(f"{rel(p)}:{n}: double period in worked example (store name ending in '.'?): {line.strip()[:80]}")
 
         # 1 + 4. HTML
         if p.suffix == ".html":
